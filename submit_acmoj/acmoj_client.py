@@ -64,8 +64,10 @@ class ACMOJClient:
 
         except requests.exceptions.RequestException as e:
             print(f"API Request failed: {e}")
-            if 'response' in locals() and response:
+            try:
                 print(f"Response text: {response.text}")
+            except Exception:
+                pass
             return None
 
     def _save_submission_id(self, submission_id):
@@ -89,6 +91,13 @@ class ACMOJClient:
         if result and 'id' in result:
             self._save_submission_id(result['id'])
 
+        return result
+
+    def submit_code(self, problem_id: int, language: str, code: str) -> Optional[Dict]:
+        data = {"language": language, "code": code, "public": "false"}
+        result = self._make_request("POST", f"/problem/{problem_id}/submit", data=data)
+        if result and 'id' in result:
+            self._save_submission_id(result['id'])
         return result
 
     def get_submission_detail(self, submission_id: int) -> Optional[Dict]:
